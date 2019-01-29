@@ -41,11 +41,12 @@ private:
 
 public:
     /// Loss types
-    enum class loss_type { 
+    enum class loss_type {
         /// Mean Squared Error
-        MSE, 
+        MSE,
         // Cross-Entropy
-        CE };
+        CE
+    };
 
     /// Constructor
     /** Constructs a dCGP expression with variable arity
@@ -283,7 +284,8 @@ public:
      * @param[labels] The predicted outputs (a batch).
      * @param[loss_s] The loss type. Can be "MSE" for Mean Square Error (regression) or "CE" for Cross Entropy
      * (classification)
-     * @param[parallel] sets the grain for parallelism. 0 -> no parallelism n -> divides the data into n parts and evaluates them in parallel threads 
+     * @param[parallel] sets the grain for parallelism. 0 -> no parallelism n -> divides the data into n parts and
+     * evaluates them in parallel threads
      * @return the loss
      */
     T loss(const std::vector<std::vector<T>> &points, const std::vector<std::vector<T>> &labels,
@@ -537,7 +539,7 @@ public:
                 new_value = std::uniform_int_distribution<unsigned>(m_lb[idx], m_ub[idx])(m_e);
             } while (new_value == m_x[idx]);
             m_x[idx] = new_value;
-            update_data_structures(); // TODO: unecessary if the gene is a function gene
+            update_data_structures(); // TODO: not necessary if the gene is a function gene
         }
     }
 
@@ -577,7 +579,7 @@ public:
      * @param[in] N number of genes to be mutated
      *
      */
-    void mutate_random(unsigned N)
+    void mutate_random(unsigned N = 1)
     {
         bool flag = false;
         for (auto i = 0u; i < N; ++i) {
@@ -606,20 +608,24 @@ public:
      */
     void mutate_active(unsigned N = 1)
     {
+        std::vector<unsigned> idxs(N);
         for (auto i = 0u; i < N; ++i) {
             unsigned idx
                 = std::uniform_int_distribution<unsigned>(0, static_cast<unsigned>(m_active_genes.size() - 1u))(m_e);
-            idx = m_active_genes[idx];
-            mutate(idx);
+            idxs[i] = m_active_genes[idx];
         }
+        mutate(idxs);
     }
 
-    /// Mutates one of the active function genes
+    /// Mutates the active function genes
     /**
-     * Mutates exactly one of the active function genes within its allowed bounds.
+     * Mutates \p N of the active function genes within its allowed bounds.
+     *
+     * @param[in] N Number of function genes to be mutated
      */
     void mutate_active_fgene(unsigned N = 1u)
     {
+        std::vector<unsigned> idxs(N);
         // If no active function gene exists, do nothing
         if (m_active_genes.size() > m_m) {
             for (auto i = 0u; i < N; ++i) {
@@ -629,18 +635,21 @@ public:
                         0, static_cast<unsigned>(m_active_nodes.size() - 1u))(m_e)];
                 }
                 // Since the first gene, for each node, is the function gene, we just mutate on that position
-                mutate(m_gene_idx[node_id]);
+                idxs[i] = m_gene_idx[node_id];
             }
         }
     }
 
-    /// Mutates one of the active connection genes
+    /// Mutates the active connection genes
     /**
-     * Mutates exactly one of the active connection genes within its allowed
+     * Mutates \p N of the active connection genes within its allowed
      * bounds.
+     *
+     * @param[in] N Number of connection genes to be mutated
      */
     void mutate_active_cgene(unsigned N = 1u)
     {
+        std::vector<unsigned> idxs(N);
         // If no active function gene exists, do nothing
         if (m_active_genes.size() > m_m) {
             for (auto i = 0u; i < N; ++i) {
@@ -649,30 +658,32 @@ public:
                     idx = m_active_nodes[std::uniform_int_distribution<unsigned>(
                         0, static_cast<unsigned>(m_active_nodes.size() - 1u))(m_e)];
                 }
-                idx = m_gene_idx[idx] + std::uniform_int_distribution<unsigned>(1, _get_arity(idx))(m_e);
-                mutate(idx);
+                idxs[i] = m_gene_idx[idx] + std::uniform_int_distribution<unsigned>(1, _get_arity(idx))(m_e);
             }
+            mutate(idxs);
         }
     }
 
-    /// Mutates one of the active output genes
+    /// Mutates the active output genes
     /**
-     * Mutates exactly one of the output genes within its allowed bounds.
+     * Mutates \p N of the output genes within its allowed bounds.
+     *
+     * @param[in] N Number of connection genes to be mutated
      */
     void mutate_ogene(unsigned N = 1)
     {
+        std::vector<unsigned> idxs(N);
         unsigned idx;
-        if (m_m > 1) {
-            for (auto i = 0u; i < N; ++i) {
+        for (auto i = 0u; i < N; ++i) {
+            if (m_m > 1) {
                 idx = std::uniform_int_distribution<unsigned>(static_cast<unsigned>(m_active_genes.size() - m_m),
                                                               static_cast<unsigned>(m_active_genes.size() - 1u))(m_e);
+            } else {
+                idx = static_cast<unsigned>(m_active_genes.size() - 1u);
             }
-
-        } else {
-            idx = static_cast<unsigned>(m_active_genes.size() - 1u);
+            idxs[i] = m_active_genes[idx];
         }
-        idx = m_active_genes[idx];
-        mutate(idx);
+        mutate(idxs);
     }
 
     /// Sets the internal seed
@@ -749,8 +760,9 @@ public:
 protected:
     /// Unchecked get arity
     /**
-     * The public method get_arity, has some checks thet are significantly impacting speed if used in performance critical code sections
-     * (such as the operator(). Thus this protected method should be used instead but use carefully as it may result in invalid reads
+     * The public method get_arity, has some checks thet are significantly impacting speed if used in performance
+     * critical code sections (such as the operator(). Thus this protected method should be used instead but use
+     * carefully as it may result in invalid reads
      *
      * @param[node_id] chromosome
      */
@@ -764,9 +776,9 @@ protected:
     /**
      * Some of the expression data depend on the chromosome. This is the case, for example,
      * of the active nodes and active genes. Each time the chromosome is changed, these structures need also to be
-     * changed. A call to this method takes care of this. In derived classes (such as for example expression_ann), one
-     * can add more of these chromosome dependant data, and will thus need to override this method, making sure to still
-     * have it called by the new method and adding there the new data book-keeping.
+     * changed. A call to this method takes care of this. In derived classes (such as for example expression_ann),
+     * one can add more of these chromosome dependant data, and will thus need to override this method, making sure
+     * to still have it called by the new method and adding there the new data book-keeping.
      */
 
     virtual void update_data_structures()
@@ -832,7 +844,8 @@ protected:
      * @param[dlast] End of data.
      * @param[lfirst] Begin of labels.
      * @param[loss_e] The loss type.
-     * @param[parallel] sets the grain for parallelism. 0 -> no parallelism n -> divides the data into n parts and evaluates them in parallel threads 
+     * @param[parallel] sets the grain for parallelism. 0 -> no parallelism n -> divides the data into n parts and
+     * evaluates them in parallel threads
      * @return the loss
      */
     T loss(typename std::vector<std::vector<T>>::const_iterator dfirst,
