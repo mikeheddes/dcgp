@@ -638,6 +638,7 @@ public:
                 idxs[i] = m_gene_idx[node_id];
             }
         }
+        mutate(idxs);
     }
 
     /// Mutates the active connection genes
