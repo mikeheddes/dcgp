@@ -1,15 +1,19 @@
 #ifndef DCGP_WRAPPED_FUNCTIONS_H
 #define DCGP_WRAPPED_FUNCTIONS_H
 
-#include <audi/audi.hpp>
-#include <audi/functions.hpp>
 #include <cmath>
 #include <string>
 #include <vector>
 
 #include <dcgp/type_traits.hpp>
 
+#ifndef __EMSCRIPTEN__
+#include <audi/audi.hpp>
+#include <audi/functions.hpp>
+
+// Allows to overload in templates std functions with audi functions
 using namespace audi;
+#endif // __EMSCRIPTEN__
 
 namespace dcgp
 {
@@ -19,9 +23,6 @@ namespace dcgp
 // double and a gdual type Complex could also be allowed.
 template <typename T>
 using f_enabler = typename std::enable_if<std::is_same<T, double>::value || is_gdual<T>::value, int>::type;
-
-// Allows to overload in templates std functions with audi functions
-using namespace audi;
 
 /*--------------------------------------------------------------------------
  *                              N-ARITY FUNCTIONS
@@ -100,7 +101,7 @@ T my_pdiv(const std::vector<T> &in)
     if (std::isfinite(retval)) {
         return retval;
     }
-    
+
     return 1.;
 }
 
@@ -134,7 +135,12 @@ T my_sig(const std::vector<T> &in)
     for (auto i = 1u; i < in.size(); ++i) {
         retval += in[i];
     }
+
+#ifndef __EMSCRIPTEN__
     return 1. / (1. + audi::exp(-retval));
+#else
+    return 1. / (1. + exp(-retval));
+#endif // __EMSCRIPTEN__
 }
 
 std::string print_my_sig(const std::vector<std::string> &in)
@@ -154,7 +160,12 @@ T my_tanh(const std::vector<T> &in)
     for (auto i = 1u; i < in.size(); ++i) {
         retval += in[i];
     }
+
+#ifndef __EMSCRIPTEN__
     return audi::tanh(retval);
+#else
+    return tanh(retval);
+#endif // __EMSCRIPTEN__
 }
 
 std::string print_my_tanh(const std::vector<std::string> &in)
@@ -207,7 +218,11 @@ T my_elu(const std::vector<T> &in)
     for (auto i = 1u; i < in.size(); ++i) {
         retval += in[i];
     }
+#ifndef __EMSCRIPTEN__
     (retval < 0) ? retval = audi::exp(retval) - T(1.) : retval = retval;
+#else
+    (retval < 0) ? retval = exp(retval) - T(1.) : retval = retval;
+#endif // __EMSCRIPTEN__
     return retval;
 }
 
@@ -219,7 +234,13 @@ T my_elu(const std::vector<T> &in)
     for (auto i = 1u; i < in.size(); ++i) {
         retval += in[i];
     }
+
+#ifndef __EMSCRIPTEN__
     (retval.constant_cf() < T(0.).constant_cf()) ? retval = audi::exp(retval) - T(1.) : retval = retval;
+#else
+    (retval.constant_cf() < T(0.).constant_cf()) ? retval = exp(retval) - T(1.) : retval = retval;
+#endif // __EMSCRIPTEN__
+
     return retval;
 }
 
@@ -240,7 +261,12 @@ T my_isru(const std::vector<T> &in)
     for (auto i = 1u; i < in.size(); ++i) {
         retval += in[i];
     }
+
+#ifndef __EMSCRIPTEN__
     return retval / (audi::sqrt(1 + retval * retval));
+#else
+    return retval / (sqrt(1 + retval * retval));
+#endif // __EMSCRIPTEN__
 }
 
 std::string print_my_isru(const std::vector<std::string> &in)
@@ -302,7 +328,11 @@ std::string print_my_cos(const std::vector<std::string> &in)
 template <typename T, f_enabler<T> = 0>
 T my_log(const std::vector<T> &in)
 {
+#ifndef __EMSCRIPTEN__
     return audi::log(in[0]);
+#else
+    return log(in[0]);
+#endif // __EMSCRIPTEN__
 }
 
 std::string print_my_log(const std::vector<std::string> &in)
@@ -315,7 +345,11 @@ std::string print_my_log(const std::vector<std::string> &in)
 template <typename T, f_enabler<T> = 0>
 T my_exp(const std::vector<T> &in)
 {
+#ifndef __EMSCRIPTEN__
     return audi::exp(in[0]);
+#else
+    return exp(in[0]);
+#endif // __EMSCRIPTEN__
 }
 
 std::string print_my_exp(const std::vector<std::string> &in)

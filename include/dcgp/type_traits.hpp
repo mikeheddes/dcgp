@@ -9,7 +9,14 @@
  * \tparam T a type to check
  */
 
-template <typename T> struct is_gdual : std::false_type {};
-template <typename T> struct is_gdual<audi::gdual<T>> : std::true_type {};
+template <typename T>
+struct is_gdual : std::false_type {
+};
+
+#ifndef __EMSCRIPTEN__
+template <typename T>
+struct is_gdual<audi::gdual<T>> : std::true_type {
+};
+#endif // __EMSCRIPTEN__
 
 #endif // DCGP_TYPE_TRAITS_H

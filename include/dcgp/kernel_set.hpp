@@ -1,11 +1,14 @@
 #ifndef DCGP_kernel_set_H
 #define DCGP_kernel_set_H
 
-#include <audi/gdual.hpp>
 #include <vector>
 
 #include <dcgp/kernel.hpp>
 #include <dcgp/wrapped_functions.hpp>
+
+#ifndef __EMSCRIPTEN__
+#include <audi/gdual.hpp>
+#endif // __EMSCRIPTEN__
 
 namespace dcgp
 {
@@ -124,7 +127,16 @@ public:
      */
     friend std::ostream &operator<<(std::ostream &os, const kernel_set<T> &d)
     {
-        stream(os, d());
+        std::vector<dcgp::kernel<T>> kernels = d();
+
+        for (unsigned int i = 0; i < kernels.size(); i++) {
+            os << kernels[i];
+
+            if (i != kernels.size() - 1) {
+                os << ", ";
+            }
+        }
+
         return os;
     }
 
