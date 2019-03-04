@@ -2,16 +2,21 @@
 #define DCGP_EXPRESSION_H
 
 #include <algorithm>
-#include <audi/audi.hpp>
 #include <initializer_list>
 #include <iostream>
 #include <random>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
+
+#ifndef __EMSCRIPTEN__
+#include <audi/audi.hpp>
 #include <tbb/spin_mutex.h>
 #include <tbb/tbb.h>
-#include <vector>
+#else
+#include <audi/io.hpp>
+#endif // __EMSCRIPTEN__
 
 #include <dcgp/kernel.hpp>
 #include <dcgp/type_traits.hpp>
@@ -259,14 +264,28 @@ public:
             case loss_type::CE: {
                 // We guard from numerical instabilities subtracting the max element
                 auto max = *std::max_element(outputs.begin(), outputs.end());
+
                 // exp(a_i - max)
+#ifndef __EMSCRIPTEN__
                 std::transform(outputs.begin(), outputs.end(), outputs.begin(),
                                [max](T a) { return audi::exp(a - max); });
+#else
+                std::transform(outputs.begin(), outputs.end(), outputs.begin(),
+                               [max](T a) { return exp(a - max); });
+#endif // __EMSCRIPTEN__
+
                 // sum exp(a_i - max)
                 T cumsum = std::accumulate(outputs.begin(), outputs.end(), T(0.));
+
                 // log(p_i) * y_i
+#ifndef __EMSCRIPTEN__
                 std::transform(outputs.begin(), outputs.end(), prediction.begin(), outputs.begin(),
                                [cumsum](T a, T y) { return audi::log(a / cumsum) * y; });
+#else
+                std::transform(outputs.begin(), outputs.end(), prediction.begin(), outputs.begin(),
+                               [cumsum](T a, T y) { return log(a / cumsum) * y; });
+#endif // __EMSCRIPTEN__
+
                 // - sum log(p_i) y_i
                 retval = -std::accumulate(outputs.begin(), outputs.end(), T(0.));
                 break;
@@ -841,6 +860,8 @@ protected:
     {
         T retval(0.);
         unsigned batch_size = static_cast<unsigned>(dlast - dfirst);
+
+#ifndef __EMSCRIPTEN__
         if (parallel > 0u) {
             if (batch_size % parallel != 0) {
                 throw std::invalid_argument("The batch size is: " + std::to_string(batch_size)
@@ -862,11 +883,17 @@ protected:
                 retval += err;
             });
         } else {
+#endif // __EMSCRIPTEN__
+
             for (long i = 0; i < batch_size; ++i) {
                 // The loss gets computed
                 retval += loss(*(dfirst + i), *(lfirst + i), loss_e);
             }
+
+#ifndef __EMSCRIPTEN__
         }
+#endif // __EMSCRIPTEN__
+
         retval /= batch_size;
 
         return retval;
