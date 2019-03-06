@@ -29,7 +29,7 @@ using f_enabler = typename std::enable_if<std::is_same<T, double>::value || is_g
  *------------------------------------------------------------------------**/
 
 template <typename T, f_enabler<T> = 0>
-T my_diff(const std::vector<T> &in)
+inline T my_diff(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -38,7 +38,7 @@ T my_diff(const std::vector<T> &in)
     return retval;
 }
 
-std::string print_my_diff(const std::vector<std::string> &in)
+inline std::string print_my_diff(const std::vector<std::string> &in)
 {
     std::string retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -48,7 +48,7 @@ std::string print_my_diff(const std::vector<std::string> &in)
 }
 
 template <typename T, f_enabler<T> = 0>
-T my_mul(const std::vector<T> &in)
+inline T my_mul(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -57,7 +57,7 @@ T my_mul(const std::vector<T> &in)
     return retval;
 }
 
-std::string print_my_mul(const std::vector<std::string> &in)
+inline std::string print_my_mul(const std::vector<std::string> &in)
 {
     std::string retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -67,7 +67,7 @@ std::string print_my_mul(const std::vector<std::string> &in)
 }
 
 template <typename T, f_enabler<T> = 0>
-T my_div(const std::vector<T> &in)
+inline T my_div(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -76,7 +76,7 @@ T my_div(const std::vector<T> &in)
     return retval;
 }
 
-std::string print_my_div(const std::vector<std::string> &in)
+inline std::string print_my_div(const std::vector<std::string> &in)
 {
     std::string retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -87,7 +87,7 @@ std::string print_my_div(const std::vector<std::string> &in)
 
 // protected division (double overload):
 template <typename T, typename std::enable_if<std::is_same<T, double>::value, int>::type = 0>
-T my_pdiv(const std::vector<T> &in)
+inline T my_pdiv(const std::vector<T> &in)
 {
     T retval(in[0]);
     T tmpval(in[1]);
@@ -107,7 +107,7 @@ T my_pdiv(const std::vector<T> &in)
 
 // protected division (gdual overload):
 template <typename T, typename std::enable_if<is_gdual<T>::value, int>::type = 0>
-T my_pdiv(const std::vector<T> &in)
+inline T my_pdiv(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -118,7 +118,7 @@ T my_pdiv(const std::vector<T> &in)
     return retval;
 }
 
-std::string print_my_pdiv(const std::vector<std::string> &in)
+inline std::string print_my_pdiv(const std::vector<std::string> &in)
 {
     return "(" + in[0] + "/" + in[1] + ")";
 }
@@ -129,7 +129,7 @@ std::string print_my_pdiv(const std::vector<std::string> &in)
 
 // sigmoid function: 1 / (1 + exp(- (a + b + c + d+ .. + ))
 template <typename T, f_enabler<T> = 0>
-T my_sig(const std::vector<T> &in)
+inline T my_sig(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -143,7 +143,7 @@ T my_sig(const std::vector<T> &in)
 #endif // __EMSCRIPTEN__
 }
 
-std::string print_my_sig(const std::vector<std::string> &in)
+inline std::string print_my_sig(const std::vector<std::string> &in)
 {
     std::string retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -154,7 +154,7 @@ std::string print_my_sig(const std::vector<std::string> &in)
 
 // tanh function:
 template <typename T, f_enabler<T> = 0>
-T my_tanh(const std::vector<T> &in)
+inline T my_tanh(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -168,7 +168,7 @@ T my_tanh(const std::vector<T> &in)
 #endif // __EMSCRIPTEN__
 }
 
-std::string print_my_tanh(const std::vector<std::string> &in)
+inline std::string print_my_tanh(const std::vector<std::string> &in)
 {
     std::string retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -179,7 +179,7 @@ std::string print_my_tanh(const std::vector<std::string> &in)
 
 // ReLu function (double overload):
 template <typename T, typename std::enable_if<std::is_same<T, double>::value, int>::type = 0>
-T my_relu(const std::vector<T> &in)
+inline T my_relu(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -191,7 +191,7 @@ T my_relu(const std::vector<T> &in)
 
 // ReLu function (gdual overload):
 template <typename T, typename std::enable_if<is_gdual<T>::value, int>::type = 0>
-T my_relu(const std::vector<T> &in)
+inline T my_relu(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -201,7 +201,7 @@ T my_relu(const std::vector<T> &in)
     return retval;
 }
 
-std::string print_my_relu(const std::vector<std::string> &in)
+inline std::string print_my_relu(const std::vector<std::string> &in)
 {
     std::string retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -212,7 +212,7 @@ std::string print_my_relu(const std::vector<std::string> &in)
 
 // Exponential linear unit (ELU) function (double overload):
 template <typename T, typename std::enable_if<std::is_same<T, double>::value, int>::type = 0>
-T my_elu(const std::vector<T> &in)
+inline T my_elu(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -228,7 +228,7 @@ T my_elu(const std::vector<T> &in)
 
 // Exponential linear unit (ELU) function (gdual overload):
 template <typename T, typename std::enable_if<is_gdual<T>::value, int>::type = 0>
-T my_elu(const std::vector<T> &in)
+inline T my_elu(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -244,7 +244,7 @@ T my_elu(const std::vector<T> &in)
     return retval;
 }
 
-std::string print_my_elu(const std::vector<std::string> &in)
+inline std::string print_my_elu(const std::vector<std::string> &in)
 {
     std::string retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -255,7 +255,7 @@ std::string print_my_elu(const std::vector<std::string> &in)
 
 // Inverse square root function: x / sqrt(1+x^2):
 template <typename T, f_enabler<T> = 0>
-T my_isru(const std::vector<T> &in)
+inline T my_isru(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -269,7 +269,7 @@ T my_isru(const std::vector<T> &in)
 #endif // __EMSCRIPTEN__
 }
 
-std::string print_my_isru(const std::vector<std::string> &in)
+inline std::string print_my_isru(const std::vector<std::string> &in)
 {
     std::string retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -279,7 +279,7 @@ std::string print_my_isru(const std::vector<std::string> &in)
 }
 
 template <typename T, f_enabler<T> = 0>
-T my_sum(const std::vector<T> &in)
+inline T my_sum(const std::vector<T> &in)
 {
     T retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -288,7 +288,7 @@ T my_sum(const std::vector<T> &in)
     return retval;
 }
 
-std::string print_my_sum(const std::vector<std::string> &in)
+inline std::string print_my_sum(const std::vector<std::string> &in)
 {
     std::string retval(in[0]);
     for (auto i = 1u; i < in.size(); ++i) {
@@ -302,31 +302,31 @@ std::string print_my_sum(const std::vector<std::string> &in)
  *------------------------------------------------------------------------**/
 // sine
 template <typename T, f_enabler<T> = 0>
-T my_sin(const std::vector<T> &in)
+inline T my_sin(const std::vector<T> &in)
 {
     return sin(in[0]);
 }
 
-std::string print_my_sin(const std::vector<std::string> &in)
+inline std::string print_my_sin(const std::vector<std::string> &in)
 {
     return "sin(" + in[0] + ")";
 }
 
 // cosine
 template <typename T, f_enabler<T> = 0>
-T my_cos(const std::vector<T> &in)
+inline T my_cos(const std::vector<T> &in)
 {
     return cos(in[0]);
 }
 
-std::string print_my_cos(const std::vector<std::string> &in)
+inline std::string print_my_cos(const std::vector<std::string> &in)
 {
     return "cos(" + in[0] + ")";
 }
 
 // logarithm
 template <typename T, f_enabler<T> = 0>
-T my_log(const std::vector<T> &in)
+inline T my_log(const std::vector<T> &in)
 {
 #ifndef __EMSCRIPTEN__
     return audi::log(in[0]);
@@ -335,7 +335,7 @@ T my_log(const std::vector<T> &in)
 #endif // __EMSCRIPTEN__
 }
 
-std::string print_my_log(const std::vector<std::string> &in)
+inline std::string print_my_log(const std::vector<std::string> &in)
 {
     return "log(" + in[0] + ")";
 }
@@ -343,7 +343,7 @@ std::string print_my_log(const std::vector<std::string> &in)
 // exponential (unary)
 // This exponential discards all inputs except the first one
 template <typename T, f_enabler<T> = 0>
-T my_exp(const std::vector<T> &in)
+inline T my_exp(const std::vector<T> &in)
 {
 #ifndef __EMSCRIPTEN__
     return audi::exp(in[0]);
@@ -352,7 +352,7 @@ T my_exp(const std::vector<T> &in)
 #endif // __EMSCRIPTEN__
 }
 
-std::string print_my_exp(const std::vector<std::string> &in)
+inline std::string print_my_exp(const std::vector<std::string> &in)
 {
     return "exp(" + in[0] + ")";
 }
